@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # README
 
 This README would normally document whatever steps are necessary to get the
@@ -22,3 +23,6 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+=======
+# Project-atheva-supermarket
+>>>>>>> dee05f3fb371ff93ea78e7ece75dbb3c78f18af6
