@@ -20,6 +20,7 @@ class ProductsController < ApplicationController
   def buy
     @product = Product.new(product_params)
 
+    #Verifica se já existe um produto com o mesmo nome
     if Product.find_by_name(@product.name) != nil
       @updateproduct = Product.find_by_name(@product.name)
       @updateproduct.quantity = (@updateproduct.quantity.to_i + params[:quantity])
@@ -28,6 +29,7 @@ class ProductsController < ApplicationController
       @product = @updateproduct
     end
 
+    #Verifica se já existe um produto com o mesmo codigo
     if Product.find_by_code(@product.code) != nil
       @updateproduct = Product.find_by_code(@product.code)
       @updateproduct.quantity = (@updateproduct.quantity.to_i + params[:quantity])
@@ -38,15 +40,18 @@ class ProductsController < ApplicationController
 
     if @product.save
 
+      #Atualiza a quantidade da categoria
       @category = Category.find(@product.category_id)
       @category.quantity = (@category.quantity.to_i + params[:quantity].to_i)
       @category.save
 
+      #Atualiza o Saldo
       @supermarket = @product.category.supermarket
       @value = params[:quantity] * @product.price
       @supermarket.balance = (@supermarket.balance - @value)
       @supermarket.save
 
+      #Cria o Extrato
       Extract.create!(event: "Compra de #{params[:quantity]} #{@product.name}",
                            value: (0 - @value),
                            quantity: (params[:quantity]),
@@ -63,6 +68,7 @@ class ProductsController < ApplicationController
   def sell
     @product = Product.new(product_params)
 
+    #Verifica se já existe um produto com o mesmo nome
     if Product.find_by_name(@product.name) != nil
       @updateproduct = Product.find_by_name(@product.name)
       @updateproduct.quantity = (@updateproduct.quantity.to_i - params[:quantity])
@@ -71,6 +77,7 @@ class ProductsController < ApplicationController
       @product = @updateproduct
     end
 
+    #Verifica se já existe um produto com o mesmo codigo
     if Product.find_by_code(@product.code) != nil
       @updateproduct = Product.find_by_code(@product.code)
       @updateproduct.quantity = (@updateproduct.quantity.to_i - params[:quantity])
@@ -81,15 +88,18 @@ class ProductsController < ApplicationController
 
     if @product.save
 
+      #Atualiza a quantidade da categoria
       @category = Category.find(@product.category_id)
       @category.quantity = (@category.quantity.to_i - params[:quantity].to_i)
       @category.save
 
+      #Atualiza o saldo
       @supermarket = @product.category.supermarket
       @value = params[:quantity] * @product.price
       @supermarket.balance = (@supermarket.balance + @value)
       @supermarket.save
 
+      #Cria o extrato
       Extract.create!(event: "Venda de #{params[:quantity]} #{@product.name}",
                       value: (@value),
                       quantity: (params[:quantity]),
@@ -126,7 +136,7 @@ class ProductsController < ApplicationController
   end
 
   private
-    # Only allow a trusted parameter "white list" through.
+
     def product_params
       params.require(:product).permit(:name, :price, :quantity, :category_id, :code)
     end

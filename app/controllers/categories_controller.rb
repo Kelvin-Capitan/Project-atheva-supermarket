@@ -4,8 +4,8 @@ class CategoriesController < ApplicationController
   def list_all
     response = []
     Category.all.each do |category|
-      category = JSON::parse(category.to_json).merge("supermarket_name" => category.supermarket.name).to_json
-      response << JSON::parse(category)
+      category = JSON::parse(category.to_json).merge("supermarket_name" => category.supermarket.name)
+      response << category
     end
     render json: response
   end

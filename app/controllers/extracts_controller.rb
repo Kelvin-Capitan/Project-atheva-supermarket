@@ -24,11 +24,7 @@ class ExtractsController < ApplicationController
       response << extract
     end
 
-    if response.blank?
-      render json: "Não tem nada"
-    else
-      render json: response
-    end
+    render json: response
   end
 
   def list_by_category
