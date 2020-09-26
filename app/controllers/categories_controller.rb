@@ -43,7 +43,7 @@ class CategoriesController < ApplicationController
     Category.find(params[:id]).destroy
   end
 
-  # DELETE /categories/remove_many
+  # DELETE /categories/remove/many
   def remove_many
     params[:remove_list].to_a.each do |id|
       Category.find(id).destroy

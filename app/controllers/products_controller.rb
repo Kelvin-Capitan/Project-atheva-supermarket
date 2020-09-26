@@ -22,20 +22,14 @@ class ProductsController < ApplicationController
 
     #Verifica se já existe um produto com o mesmo nome
     if Product.find_by_name(@product.name) != nil
-      @updateproduct = Product.find_by_name(@product.name)
-      @updateproduct.quantity = (@updateproduct.quantity.to_i + params[:quantity])
-      @updateproduct.price = @product.price
-      @updateproduct.code = @product.code
-      @product = @updateproduct
+      @product = Product.find_by_name(@product.name)
+      @product.quantity = (@product.quantity.to_i + params[:quantity])
     end
 
     #Verifica se já existe um produto com o mesmo codigo
     if Product.find_by_code(@product.code) != nil
-      @updateproduct = Product.find_by_code(@product.code)
-      @updateproduct.quantity = (@updateproduct.quantity.to_i + params[:quantity])
-      @updateproduct.price = @product.price
-      @updateproduct.code = @product.code
-      @product = @updateproduct
+      @product = Product.find_by_code(@product.code)
+      @product.quantity = (@product.quantity.to_i + params[:quantity])
     end
 
     if @product.save
@@ -70,20 +64,14 @@ class ProductsController < ApplicationController
 
     #Verifica se já existe um produto com o mesmo nome
     if Product.find_by_name(@product.name) != nil
-      @updateproduct = Product.find_by_name(@product.name)
-      @updateproduct.quantity = (@updateproduct.quantity.to_i - params[:quantity])
-      @updateproduct.price = @product.price
-      @updateproduct.code = @product.code
-      @product = @updateproduct
+      @product = Product.find_by_name(@product.name)
+      @product.quantity = (@product.quantity.to_i - params[:quantity])
     end
 
     #Verifica se já existe um produto com o mesmo codigo
     if Product.find_by_code(@product.code) != nil
-      @updateproduct = Product.find_by_code(@product.code)
-      @updateproduct.quantity = (@updateproduct.quantity.to_i - params[:quantity])
-      @updateproduct.price = @product.price
-      @updateproduct.code = @product.code
-      @product = @updateproduct
+      @product = Product.find_by_code(@product.code)
+      @product.quantity = (@product.quantity.to_i - params[:quantity])
     end
 
     if @product.save
@@ -128,7 +116,7 @@ class ProductsController < ApplicationController
     Product.find(params[:id]).destroy
   end
 
-  # DELETE /categories/remove_many
+  # DELETE /categories/remove/many
   def remove_many
     params[:remove_list].to_a.each do |id|
       Product.find(id).destroy
