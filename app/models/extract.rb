@@ -8,8 +8,4 @@ class Extract < ApplicationRecord
   validates_presence_of :event, message: " - deve ser preenchido"
   validates_presence_of :value, message: " - deve ser preenchido"
   validates_presence_of :quantity, message: " - deve ser preenchido"
-  validates_numericality_of :value, greater_than: 0,
-                            message: " - deve ser um valor maior que 0"
-  validates_numericality_of :quantity, greater_than: 0,
-                            message: " - deve ser uma quantidade maior que 0"
 end

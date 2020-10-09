@@ -1,4 +1,5 @@
 class ProductsController < ApplicationController
+  include Update
 
   # GET /products
   def list_all
@@ -18,32 +19,20 @@ class ProductsController < ApplicationController
 
   # PATCH /products/buy
   def buy
-    @product = Product.new(product_params)
 
-    #Verifica se já existe um produto com o mesmo nome
-    if Product.find_by_name(@product.name) != nil
-      @product = Product.find_by_name(@product.name)
-      @product.quantity = (@product.quantity.to_i + params[:quantity])
+    #Verifica se já existe um produto com o mesmo nome codigo senão cria um novo
+    if search_by_name_and_code(params[:name],params[:code],params[:quantity].to_i) == false
+      @product = Product.new(product_params)
     end
 
-    #Verifica se já existe um produto com o mesmo codigo
-    if Product.find_by_code(@product.code) != nil
-      @product = Product.find_by_code(@product.code)
-      @product.quantity = (@product.quantity.to_i + params[:quantity])
-    end
 
     if @product.save
 
       #Atualiza a quantidade da categoria
-      @category = Category.find(@product.category_id)
-      @category.quantity = (@category.quantity.to_i + params[:quantity].to_i)
-      @category.save
+      update_quantity(@product,params[:quantity].to_i)
 
       #Atualiza o Saldo
-      @supermarket = @product.category.supermarket
-      @value = params[:quantity] * @product.price
-      @supermarket.balance = (@supermarket.balance - @value)
-      @supermarket.save
+      update_balance(@product,params[:quantity].to_i)
 
       #Cria o Extrato
       Extract.create!(event: "Compra de #{params[:quantity]} #{@product.name}",
@@ -60,32 +49,18 @@ class ProductsController < ApplicationController
 
   # PATH /products/sell
   def sell
-    @product = Product.new(product_params)
-
-    #Verifica se já existe um produto com o mesmo nome
-    if Product.find_by_name(@product.name) != nil
-      @product = Product.find_by_name(@product.name)
-      @product.quantity = (@product.quantity.to_i - params[:quantity])
-    end
-
-    #Verifica se já existe um produto com o mesmo codigo
-    if Product.find_by_code(@product.code) != nil
-      @product = Product.find_by_code(@product.code)
-      @product.quantity = (@product.quantity.to_i - params[:quantity])
+    #Verifica se já existe um produto com o mesmo nome codigo senão cria um novo
+    if search_by_name_and_code(params[:name],params[:code],params[:quantity].to_i) == false
+      @product = Product.new(product_params)
     end
 
     if @product.save
 
       #Atualiza a quantidade da categoria
-      @category = Category.find(@product.category_id)
-      @category.quantity = (@category.quantity.to_i - params[:quantity].to_i)
-      @category.save
+      update_quantity(@product,params[:quantity].to_i)
 
       #Atualiza o saldo
-      @supermarket = @product.category.supermarket
-      @value = params[:quantity] * @product.price
-      @supermarket.balance = (@supermarket.balance + @value)
-      @supermarket.save
+      update_balance(@product,params[:quantity].to_i)
 
       #Cria o extrato
       Extract.create!(event: "Venda de #{params[:quantity]} #{@product.name}",
@@ -124,6 +99,22 @@ class ProductsController < ApplicationController
   end
 
   private
+
+    def search_by_name_and_code(name,code,quantity)
+      #Verifica se já existe um produto com o mesmo nome
+      if Product.find_by_name(name) != nil
+        @product = Product.find_by_name(name)
+        @product.quantity = (@product.quantity.to_i + quantity)
+        return true
+        #Verifica se já existe um produto com o mesmo codigo
+        elsif Product.find_by_code(code) != nil
+          @product = Product.find_by_code(code)
+          @product.quantity = (@product.quantity.to_i + quantity)
+          return true
+      else
+        return false
+      end
+    end
 
     def product_params
       params.require(:product).permit(:name, :price, :quantity, :category_id, :code)
