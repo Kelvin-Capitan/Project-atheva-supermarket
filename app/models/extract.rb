@@ -2,6 +2,8 @@ class Extract < ApplicationRecord
   belongs_to :supermarket
   belongs_to :product
 
+  scope :with_supermarket_name, -> { joins(:supermarket).select("extracts.*, supermarket.name as supermarket_name")}
+
   validates_presence_of :supermarket_id, :product_id
   validates_associated :supermarket, :product
 

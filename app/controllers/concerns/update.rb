@@ -3,7 +3,7 @@ module Update
   def update_quantity(product,quantity)
     @category = Category.find(product.category_id)
     @category.quantity = (@category.quantity.to_i + quantity)
-    @category.save
+    @category.save!
   end
 
   def update_balance(product,quantity)
@@ -14,6 +14,6 @@ module Update
       @value = product.price * -quantity
     end
     @supermarket.balance = (@supermarket.balance - @value)
-    @supermarket.save
+    @supermarket.save!
   end
 end

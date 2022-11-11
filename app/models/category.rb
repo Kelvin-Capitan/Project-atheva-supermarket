@@ -2,6 +2,8 @@ class Category < ApplicationRecord
   belongs_to :supermarket
   has_many :products, dependent: :destroy
 
+  scope :with_supermarket_name, -> { joins(:supermarket).select("categories.*, supermarket.name as supermarket_name")}
+
   validates_presence_of :supermarket_id
   validates_associated :supermarket
 

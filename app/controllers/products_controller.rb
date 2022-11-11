@@ -3,31 +3,24 @@ class ProductsController < ApplicationController
 
   # GET /products
   def list_all
-    response = []
-    Product.all.each do |prod|
-      prod = JSON::parse(prod.to_json).merge("supermarket_name" => prod.category.supermarket.name)
-      response << prod
-    end
+    response = Product.with_supermarket_name
     render json: response
   end
 
   # GET /products/:id
   def list_one
-    @product = Product.find(params[:id])
-    render json: JSON::parse(@product.to_json).merge("supermarket_name" => @product.category.supermarket.name)
+    @product = Product.with_supermarket_name.find(params[:id])
+    render json: @product
   end
 
-  # PATCH /products/buy
-  def buy
-
+  # PATCH /products/trasaction
+  def buy_or_sell
     #Verifica se já existe um produto com o mesmo nome codigo senão cria um novo
-    if search_by_name_and_code(params[:name],params[:code],params[:quantity].to_i) == false
+    unless search_by_name_and_code(params[:name], params[:code], params[:quantity].to_i)
       @product = Product.new(product_params)
     end
 
-
-    if @product.save
-
+    if @product.save!
       #Atualiza a quantidade da categoria
       update_quantity(@product,params[:quantity].to_i)
 
@@ -40,8 +33,7 @@ class ProductsController < ApplicationController
                            quantity: (params[:quantity]),
                            supermarket_id: @product.category.supermarket.id,
                            product_id: @product.id)
-
-      render json: JSON::parse(@product.to_json).merge("supermarket_name" => @product.category.supermarket.name), status: :created
+      render json: @product.with_supermarket_name, status: :created
     else
       render json: @product.errors, status: :unprocessable_entity
     end
@@ -50,7 +42,7 @@ class ProductsController < ApplicationController
   # PATH /products/sell
   def sell
     #Verifica se já existe um produto com o mesmo nome codigo senão cria um novo
-    if search_by_name_and_code(params[:name],params[:code],params[:quantity].to_i) == false
+    unless search_by_name_and_code(params[:name], params[:code], params[:quantity].to_i)
       @product = Product.new(product_params)
     end
 
@@ -69,7 +61,7 @@ class ProductsController < ApplicationController
                       supermarket_id: @product.category.supermarket.id,
                       product_id: @product.id)
 
-      render json: JSON::parse(@product.to_json).merge("supermarket_name" => @product.category.supermarket.name), status: :created
+      render json: @product.with_supermarket_name, status: :created
     else
       render json: @product.errors, status: :unprocessable_entity
     end
@@ -80,7 +72,7 @@ class ProductsController < ApplicationController
     @product = Product.find(params[:id])
 
     if @product.update(product_params)
-      render json: JSON::parse(@product.to_json).merge("supermarket_name" => @product.category.supermarket.name)
+      render json: @product.with_supermarket_name
     else
       render json: @product.errors, status: :unprocessable_entity
     end
@@ -105,14 +97,14 @@ class ProductsController < ApplicationController
       if Product.find_by_name(name) != nil
         @product = Product.find_by_name(name)
         @product.quantity = (@product.quantity.to_i + quantity)
-        return true
+        true
         #Verifica se já existe um produto com o mesmo codigo
         elsif Product.find_by_code(code) != nil
           @product = Product.find_by_code(code)
           @product.quantity = (@product.quantity.to_i + quantity)
           return true
       else
-        return false
+        false
       end
     end
 

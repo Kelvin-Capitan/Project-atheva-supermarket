@@ -18,58 +18,30 @@ class ExtractsController < ApplicationController
 
   # GET /extracts/list_by_product/:id
   def list_by_product
-    response = []
-    Extract.where(product_id: params[:id]).each do |extract|
-      extract = JSON::parse(extract.to_json).merge("supermarket_name" => extract.supermarket.name)
-      response << extract
-    end
-
+    response =  Extract.where(product_id: params[:id]).with_supermarket_name
     render json: response
   end
 
   def list_by_category
-    response = []
-    @ids = []
-    Category.find(params[:id]).products.each do |prod|
-      @ids << prod.id
-    end
-    Extract.where(product_id: @ids).each do |extract|
-      extract = JSON::parse(extract.to_json).merge("supermarket_name" => extract.supermarket.name)
-      response << extract
-    end
+    response = Extract.where(product_id: Category.find(params[:id]).products.pluck(product: :id))
+      .with_supermarket_name
     render json: response
   end
 
   def list_by_date
-    response = []
-    puts ""
-    @date = Date.parse(params[:date])
-    puts @date
-    Extract.where("extracts.created_at LIKE ?", "%#{@date}%").each do |extract|
-      extract = JSON::parse(extract.to_json).merge("supermarket_name" => extract.supermarket.name)
-      response << extract
-    end
+    response = Extract.where("extracts.created_at LIKE ?", "%#{Date.parse(params[:date])}%")
+      .with_supermarket_name
     render json: response
   end
 
   # POST /extracts
   def create
-    @extract = Extract.new(extract_params)
-
-    if @extract.save
-      render json: @extract, status: :created, location: @extract
-    else
-      render json: @extract.errors, status: :unprocessable_entity
-    end
+    render json: Extract.create!(extract_params)
   end
 
   # PATCH/PUT /extracts/1
   def update
-    if @extract.update(extract_params)
-      render json: @extract
-    else
-      render json: @extract.errors, status: :unprocessable_entity
-    end
+    @extract.update!(extract_params)
   end
 
   private

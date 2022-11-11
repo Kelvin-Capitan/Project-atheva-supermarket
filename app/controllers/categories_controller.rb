@@ -2,18 +2,14 @@ class CategoriesController < ApplicationController
 
   # GET /categories
   def list_all
-    response = []
-    Category.all.each do |category|
-      category = JSON::parse(category.to_json).merge("supermarket_name" => category.supermarket.name)
-      response << category
-    end
+    response = Category.with_supermarket_name
     render json: response
   end
 
   # GET /categories/:id
   def list_one
     @category = Category.find(params[:id])
-    render json: JSON::parse(@category.to_json).merge("supermarket_name" => @category.supermarket.name).to_json
+    render json: @category.with_supermarket_name
   end
 
   # POST /categories
@@ -45,9 +41,7 @@ class CategoriesController < ApplicationController
 
   # DELETE /categories/remove/many
   def remove_many
-    params[:remove_list].to_a.each do |id|
-      Category.find(id).destroy
-    end
+    Category.where(id: params[:remove_list].to_a.pluck(:id)).destroy_all
   end
 
   private

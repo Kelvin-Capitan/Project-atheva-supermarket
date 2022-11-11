@@ -1,4 +1,7 @@
 class Product < ApplicationRecord
+
+  scope :with_supermarket_name, -> { joins(:category => :supermarket).select("products.*, supermarkets.name as supermarket_name")}
+
   belongs_to :category
   has_many :extracts, dependent: :destroy
 
